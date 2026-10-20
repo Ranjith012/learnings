@@ -1974,3 +1974,480 @@ getData();
 - **`try...catch`** helps handle errors from rejected Promises.
 
 **Key takeaway:** `async/await` makes asynchronous JavaScript easier to read and maintain while using Promises behind the scenes.
+
+# Working with APIs
+
+When working with remote APIs, we need a way to communicate with servers. JavaScript provides two common ways to send HTTP requests to remote servers: **`XMLHttpRequest` (XHR)** and **`Fetch API`**.
+
+## XMLHttpRequest
+
+**`XMLHttpRequest` (XHR)** is a built-in browser object used to send HTTP requests and communicate with servers. It allows us to retrieve or update data without reloading the webpage.
+
+Despite the word XML in its name, XHR can handle different types of data, including **JSON, XML, text, and files**.
+
+### Example
+
+```javascript
+const xhr = new XMLHttpRequest();
+
+xhr.open("GET", "https://jsonplaceholder.typicode.com/users");
+
+xhr.onload = function () {
+  if (xhr.status === 200) {
+    console.log(JSON.parse(xhr.responseText));
+  }
+};
+
+xhr.send();
+```
+
+**Key takeaway:** `XMLHttpRequest` is used to send HTTP requests and handle server responses using event-based callbacks.
+
+## Fetch API
+
+The **Fetch API** provides a modern way to send HTTP requests to servers and retrieve data. The `fetch()` method returns a **Promise**, which can be handled using `.then()` and `.catch()` or `async/await`.
+
+It supports different types of responses, including **JSON, XML, text, and files**.
+
+### Example
+
+```javascript
+fetch("https://jsonplaceholder.typicode.com/users")
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error("HTTP error: " + response.status);
+    }
+
+    return response.json();
+  })
+  .then((data) => {
+    console.log(data);
+  })
+  .catch((error) => {
+    console.error("Error:", error);
+  });
+```
+
+**Key takeaway:** `fetch()` is a Promise-based API that makes sending HTTP requests and handling responses easier.
+
+## Difference Between XMLHttpRequest and Fetch
+
+| Feature        | XMLHttpRequest                   | Fetch API                       |
+| -------------- | -------------------------------- | ------------------------------- |
+| Approach       | Event-based                      | Promise-based                   |
+| Syntax         | Comparatively complex            | Simpler and cleaner             |
+| Async/await    | Not directly supported           | Supported                       |
+| Error handling | Uses events and status codes     | Uses Promises and status checks |
+| Modern usage   | Legacy and specialised use cases | Preferred for most new projects |
+
+**Important:** Both APIs can send HTTP requests and receive server responses. The `fetch()` method does not automatically reject its Promise for HTTP errors such as `404` or `500`; check `response.ok` to handle these cases.
+
+# Classes
+
+**Classes** are templates for creating objects. They encapsulate data and methods that operate on that data.
+
+In JavaScript, classes are built on **prototypes**, but they provide a cleaner syntax for creating objects and implementing inheritance.
+
+## Example
+
+```javascript
+class Person {
+  constructor(name, age) {
+    this.name = name;
+    this.age = age;
+  }
+
+  greet() {
+    console.log(`Hello, my name is ${this.name}`);
+  }
+}
+
+const person1 = new Person("Kamesh", 25);
+
+person1.greet(); // Hello, my name is Kamesh
+```
+
+**Key takeaway:** Classes provide a structured way to create objects, define methods, and implement inheritance in JavaScript.
+
+---
+
+# JavaScript Iterators and Generators
+
+**Iterators and generators** are JavaScript features introduced in ECMAScript 6 (ES6) that help us work with sequences of data.
+
+## Iterators
+
+An **iterator** is an object that follows the iterator protocol. It provides a `next()` method that returns an object containing:
+
+- **`value`** – The current value.
+- **`done`** – A Boolean indicating whether the iteration is complete.
+
+### Example
+
+```javascript
+const numbers = [10, 20, 30];
+
+const iterator = numbers[Symbol.iterator]();
+
+console.log(iterator.next()); // { value: 10, done: false }
+console.log(iterator.next()); // { value: 20, done: false }
+console.log(iterator.next()); // { value: 30, done: false }
+console.log(iterator.next()); // { value: undefined, done: true }
+```
+
+**Key takeaway:** Iterators allow us to access values one at a time using the `next()` method.
+
+## Generators
+
+A **generator** is a special function that can pause and resume its execution. It is defined using the `function*` syntax and uses the **`yield`** keyword to produce values.
+
+Calling a generator function returns a generator object, which follows the iterator protocol.
+
+### Example
+
+```javascript
+function* generateNumbers() {
+  yield 10;
+  yield 20;
+  yield 30;
+}
+
+const numbers = generateNumbers();
+
+console.log(numbers.next()); // { value: 10, done: false }
+console.log(numbers.next()); // { value: 20, done: false }
+console.log(numbers.next()); // { value: 30, done: false }
+console.log(numbers.next()); // { value: undefined, done: true }
+```
+
+### Using Generators with `for...of`
+
+```javascript
+function* generateNumbers() {
+  yield 10;
+  yield 20;
+  yield 30;
+}
+
+for (const number of generateNumbers()) {
+  console.log(number);
+}
+
+// Output:
+// 10
+// 20
+// 30
+```
+
+**Key takeaway:** Generators make it easy to create iterators by using `function*` and `yield` to produce values one at a time.
+
+## Difference Between Iterators and Generators
+
+| Feature         | Iterators                                           | Generators                                       |
+| --------------- | --------------------------------------------------- | ------------------------------------------------ |
+| Definition      | Objects that follow the iterator protocol           | Special functions that produce generator objects |
+| Creation        | Can be created manually or through iterable objects | Created using `function*`                        |
+| Value retrieval | Uses the `next()` method                            | Uses `yield` and the `next()` method             |
+| Execution       | Depends on the iterator implementation              | Pauses at `yield` and resumes on the next call   |
+| Usage           | Used to traverse sequences                          | Makes creating custom iterators easier           |
+
+# JavaScript Modules
+
+**Modules** are separate files that encapsulate code, such as functions, variables, and classes, and allow us to share them with other files.
+
+Modules help us **organize code, improve maintainability, and reuse functionality**. They were introduced into JavaScript with ECMAScript 6 (ES6).
+
+## ES Modules (ESM)
+
+**ES Modules (ESM)** are the standard JavaScript module system introduced in ES6 (2015). They use the `import` and `export` keywords to share code between files.
+
+ESM is widely used in frontend frameworks such as React and is also supported by Node.js. The `.mjs` extension can be used for ES modules in Node.js.
+
+### Example
+
+**math.js**
+
+```javascript
+export const add = (a, b) => a + b;
+
+export default function subtract(a, b) {
+  return a - b;
+}
+```
+
+**app.js**
+
+```javascript
+import subtract, { add } from "./math.js";
+
+console.log(add(10, 5)); // 15
+console.log(subtract(10, 5)); // 5
+```
+
+**Key points:**
+
+- **`export`** – Makes functions, variables, or classes available to other modules.
+- **`import`** – Allows us to use exported functionality from another module.
+- **`export default`** – Exports one default value from a module.
+- **`.mjs`** – Explicitly identifies an ES module in Node.js.
+
+**Key takeaway:** ES Modules use `import` and `export` to share code between JavaScript files.
+
+## CommonJS (CJS)
+
+**CommonJS** is a module system traditionally used in Node.js. It uses `require()` to import code and `module.exports` or `exports` to export code.
+
+CommonJS files commonly use the `.cjs` extension. In Node.js, `.js` files can also use CommonJS when the project configuration treats them as CommonJS.
+
+### Example
+
+**math.cjs**
+
+```javascript
+const add = (a, b) => a + b;
+
+const subtract = (a, b) => a - b;
+
+module.exports = { add, subtract };
+```
+
+**app.cjs**
+
+```javascript
+const { add, subtract } = require("./math.cjs");
+
+console.log(add(10, 5)); // 15
+console.log(subtract(10, 5)); // 5
+```
+
+**Key points:**
+
+- **`require()`** – Imports functionality from another module.
+- **`module.exports`** – Exports functionality from a module.
+- **`exports`** – A shortcut that can add properties to the default `module.exports` object.
+- **`.cjs`** – Explicitly identifies a CommonJS module in Node.js.
+
+**Key takeaway:** CommonJS uses `require()` and `module.exports` to share code between Node.js files.
+
+## Difference Between ES Modules and CommonJS
+
+| Feature            | ES Modules (ESM)                                    | CommonJS (CJS)                                |
+| ------------------ | --------------------------------------------------- | --------------------------------------------- |
+| Import             | `import`                                            | `require()`                                   |
+| Export             | `export`                                            | `module.exports`                              |
+| Loading            | Static imports are resolved before module execution | `require()` loads modules synchronously       |
+| Browser support    | Supported natively by modern browsers               | Not supported natively by browsers            |
+| Node.js extensions | `.mjs` or configured `.js`                          | `.cjs` or configured `.js`                    |
+| Tree shaking       | Better support for static analysis and tree shaking | Generally more difficult                      |
+| Common usage       | Modern frontend and backend applications            | Existing and traditional Node.js applications |
+
+**Key takeaway:** Both module systems help organize and reuse code. **ES Modules use `import` and `export`, whereas CommonJS uses `require()` and `module.exports`.**
+
+# Memory Management
+
+**Memory management** is the process of allocating, using, and releasing memory while a program runs.
+
+Low-level languages like C provide manual memory management functions such as **`malloc()`** and **`free()`**. In contrast, JavaScript automatically allocates memory when values are created and uses **garbage collection** to reclaim memory that is no longer needed.
+
+However, automatic memory management does not mean developers can ignore memory usage. Memory leaks can still occur when unused objects remain reachable.
+
+## Memory Lifecycle
+
+The **memory lifecycle** consists of three stages:
+
+1. **Allocation** – Memory is reserved when values, objects, or functions are created.
+2. **Use** – The program reads or modifies the allocated memory.
+3. **Release** – Memory is reclaimed when it is no longer needed and can be collected by the garbage collector.
+
+### Example
+
+```javascript
+let user = {
+  name: "Kamesh",
+  age: 25,
+};
+
+// Use the allocated memory
+console.log(user.name);
+
+// Remove the reference
+user = null;
+```
+
+After assigning `null`, the object may become eligible for garbage collection if no other references to it exist.
+
+**Key takeaway:** JavaScript automatically manages memory allocation and release, but developers should avoid unnecessary references that keep objects in memory.
+
+## Garbage Collection
+
+**Garbage collection (GC)** is the automatic process of identifying and reclaiming memory occupied by objects that are no longer reachable.
+
+JavaScript uses the concept of **reachability** to determine which objects can still be accessed by the program.
+
+### Reachability
+
+An object is considered reachable if it can be accessed directly or indirectly from certain starting points, such as global variables and currently executing function variables.
+
+### Example
+
+```javascript
+let user = {
+  name: "Kamesh",
+};
+
+let anotherUser = user;
+
+user = null;
+
+console.log(anotherUser.name); // Kamesh
+
+anotherUser = null;
+```
+
+**Explanation:**
+
+- Initially, both `user` and `anotherUser` reference the same object.
+- Setting `user = null` does not make the object eligible for garbage collection because `anotherUser` still references it.
+- Setting `anotherUser = null` removes the remaining reference shown in this example.
+- The object can now be garbage-collected if no other references exist. The exact time of collection is determined by the JavaScript engine.
+
+### Common Causes of Memory Leaks
+
+- **Unnecessary global variables** – Objects remain reachable for longer than required.
+- **Forgotten timers** – Intervals continue running and may retain references.
+- **Event listeners** – Listeners that are no longer needed can retain objects.
+- **Closures** – References retained by closures can keep otherwise unnecessary data in memory.
+
+**Key takeaway:** JavaScript's garbage collector reclaims memory for objects that are no longer reachable. Developers should manage references carefully to prevent memory leaks.
+
+# Using Browser DevTools
+
+**Browser DevTools** are built-in developer tools available in browsers like Google Chrome and Mozilla Firefox. They help developers inspect, debug, and optimize web applications.
+
+### Key Features
+
+- **Elements** – Inspect and modify HTML and CSS.
+- **Console** – View logs, errors, and execute JavaScript.
+- **Sources** – Debug JavaScript using breakpoints and step-by-step execution.
+- **Network** – Analyze API requests, responses, and loading times.
+- **Performance** – Identify performance bottlenecks and slow operations.
+- **Memory** – Analyze memory usage and detect memory leaks.
+- **Lighthouse** – Audit performance, accessibility, SEO, and other quality metrics.
+
+**Key takeaway:** Browser DevTools help developers identify and fix issues related to functionality, performance, and memory usage.
+
+---
+
+# Debugging Issues
+
+**Debugging** is the process of identifying and fixing errors in a program.
+
+Browser DevTools provide a debugger that helps developers understand how JavaScript code executes at runtime.
+
+### Common Debugging Techniques
+
+- **Breakpoints** – Pause execution at a specific line of code.
+- **Step over** – Execute the current line and move to the next line without entering function calls.
+- **Step into** – Enter a function to debug its execution.
+- **Step out** – Finish executing the current function and return to its caller.
+- **Inspect variables** – Check the current values of variables.
+- **Call stack** – View the sequence of function calls that led to the current point.
+- **Console logging** – Use `console.log()` to display values and understand program behaviour.
+
+### Example
+
+```javascript
+function add(a, b) {
+  const result = a + b;
+  return result;
+}
+
+const total = add(10, 20);
+
+console.log(total); // 30
+```
+
+**How to debug:**
+
+1. Open DevTools using `F12` or `Ctrl + Shift + I` in Chrome on Windows.
+2. Open the **Sources** tab.
+3. Set a breakpoint on `const result = a + b;`.
+4. Run the code and inspect `a`, `b`, and `result`.
+5. Step through the code to understand its execution.
+
+**Key takeaway:** Breakpoints, variable inspection, and the call stack help developers find the root cause of bugs.
+
+---
+
+# Debugging Memory Leaks
+
+A **memory leak** occurs when a program retains memory that it no longer needs, preventing the garbage collector from reclaiming it.
+
+In JavaScript, memory leaks often happen when short-lived objects remain referenced by long-lived objects or global variables. Since these objects are still reachable, the garbage collector cannot collect them.
+
+### Example
+
+```javascript
+let users = [];
+
+function addUsers() {
+  for (let i = 0; i < 10000; i++) {
+    users.push({
+      id: i,
+      name: `User ${i}`,
+    });
+  }
+}
+
+addUsers();
+```
+
+**Explanation:**
+
+- The `users` array retains references to all created objects.
+- If the application keeps adding users without removing unnecessary entries, memory usage can continue increasing.
+- The garbage collector cannot reclaim these objects while they remain referenced by the array.
+
+### How to Detect Memory Leaks
+
+1. Open DevTools and select the **Memory** tab.
+2. Take a heap snapshot before performing an operation.
+3. Repeat the operation that may cause a memory leak.
+4. Take another heap snapshot and compare the results.
+5. Inspect retained objects and their reference paths to identify what prevents them from being collected.
+
+**Key takeaway:** Memory leaks can be detected by comparing heap snapshots and identifying unnecessary references that keep objects alive.
+
+---
+
+# Debugging Performance
+
+**Performance debugging** is the process of identifying and fixing issues that make a website slow or unresponsive.
+
+Chrome DevTools provides the **Lighthouse** tool to audit a webpage and identify opportunities to improve performance, accessibility, SEO, and other quality metrics.
+
+### How to Run a Lighthouse Audit
+
+1. Open the website in Google Chrome.
+2. Open DevTools using `F12`.
+3. Select the **Lighthouse** tab.
+4. Choose the categories and device mode you want to test.
+5. Run the audit using the available **Analyze page load** or equivalent button.
+6. Review the results, recommendations, and reference documentation.
+
+Running the audit in an Incognito window can help reduce interference from browser extensions, provided those extensions are not enabled there.
+
+### Important Performance Metrics
+
+- **Largest Contentful Paint (LCP)** – Measures how quickly the main content becomes visible.
+- **Interaction to Next Paint (INP)** – Measures how responsive a page is to user interactions.
+- **Cumulative Layout Shift (CLS)** – Measures unexpected visual layout changes.
+- **First Contentful Paint (FCP)** – Measures how quickly the first content appears.
+
+### Other Performance Tools
+
+- **Network tab** – Find slow API requests, large assets, and loading delays.
+- **Performance tab** – Analyze CPU activity, rendering, and long-running JavaScript tasks.
+- **Memory tab** – Investigate excessive memory usage and potential memory leaks.
+
+**Key takeaway:** UseLighthouse to identify broad improvement opportunities, and use the Network, Performance, and Memory tabs to investigate specific issues.
