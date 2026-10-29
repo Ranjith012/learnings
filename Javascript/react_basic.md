@@ -3824,3 +3824,2956 @@ Continuous integration automatically runs checks, such as tests and linting, whe
 - **Playwright** is useful for end-to-end browser testing.
 - **React Testing Library** is useful for testing React components through user-visible behaviour.
 - Using both helps test components individually and verify important journeys through the complete application.
+
+# Forms
+
+Forms in React need extra handling compared to plain HTML because input values are often connected to component state to keep the UI in sync with user input.
+
+Forms are used to collect information from users, such as names, email addresses, passwords, and other details. React provides ways to manage input values, validate user input, handle form submissions, and display error messages.
+
+Form libraries simplify these tasks by reducing the amount of code required to manage form state and validation.
+
+## Key Concepts
+
+- **Form State:** Stores the current values of form inputs.
+- **Controlled Components:** Input values are managed by React state.
+- **Uncontrolled Components:** Input values are managed by the DOM and can be accessed using refs.
+- **Form Validation:** Checks whether the entered data meets specific requirements.
+- **Form Submission:** Handles the data submitted by the user.
+- **Error Handling:** Displays error messages when the input data is invalid.
+
+## Simple Example
+
+```jsx
+import { useState } from "react";
+
+function LoginForm() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    console.log({
+      email,
+      password,
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div>
+        <label htmlFor="email">Email:</label>
+
+        <input
+          id="email"
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          required
+        />
+      </div>
+
+      <div>
+        <label htmlFor="password">Password:</label>
+
+        <input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          required
+        />
+      </div>
+
+      <button type="submit">Login</button>
+    </form>
+  );
+}
+
+export default LoginForm;
+```
+
+### How It Works
+
+1. `useState()` stores the email and password values.
+2. `value` connects each input to React state.
+3. `onChange` updates the state whenever the user types.
+4. `onSubmit` calls the `handleSubmit` function when the form is submitted.
+5. `event.preventDefault()` prevents the browser from reloading the page during submission.
+6. `console.log()` displays the submitted values in the browser console.
+7. The `required` attribute prevents the form from being submitted with empty fields.
+
+**Limitation:** As the number of input fields increases, managing state and validation manually can become difficult. Form libraries help simplify this process.
+
+---
+
+# React Hook Form
+
+**React Hook Form** is a library for managing form state and validation in React with minimal re-renders.
+
+It uses uncontrolled inputs by default, registering fields through refs instead of requiring React state updates for every keystroke. This can improve performance, especially when working with large forms.
+
+It also supports validation libraries such as **Zod** and **Yup**.
+
+## Key Features
+
+- Manages form values and submission.
+- Supports built-in validation rules.
+- Minimises unnecessary re-renders.
+- Provides useful methods such as `register()`, `handleSubmit()`, and `reset()`.
+- Supports integration with validation libraries.
+- Reduces the amount of boilerplate code.
+
+## Installation
+
+Install React Hook Form using npm:
+
+```bash
+npm install react-hook-form
+```
+
+## Example: Registration Form
+
+```jsx
+import { useForm } from "react-hook-form";
+
+function RegistrationForm() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit = (data) => {
+    console.log("Form Data:", data);
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div>
+        <label htmlFor="name">Name:</label>
+
+        <input
+          id="name"
+          {...register("name", {
+            required: "Name is required",
+          })}
+        />
+
+        {errors.name && <p>{errors.name.message}</p>}
+      </div>
+
+      <div>
+        <label htmlFor="email">Email:</label>
+
+        <input
+          id="email"
+          type="email"
+          {...register("email", {
+            required: "Email is required",
+            pattern: {
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: "Enter a valid email address",
+            },
+          })}
+        />
+
+        {errors.email && <p>{errors.email.message}</p>}
+      </div>
+
+      <div>
+        <label htmlFor="password">Password:</label>
+
+        <input
+          id="password"
+          type="password"
+          {...register("password", {
+            required: "Password is required",
+            minLength: {
+              value: 6,
+              message: "Password must contain at least 6 characters",
+            },
+          })}
+        />
+
+        {errors.password && <p>{errors.password.message}</p>}
+      </div>
+
+      <button type="submit">Register</button>
+    </form>
+  );
+}
+
+export default RegistrationForm;
+```
+
+## Explanation
+
+### 1. `useForm()`
+
+```jsx
+const {
+  register,
+  handleSubmit,
+  formState: { errors },
+} = useForm();
+```
+
+The `useForm()` hook provides methods and state for managing the form.
+
+- **`register()`** connects input fields to React Hook Form.
+- **`handleSubmit()`** validates the form and calls the submission function when the form is valid.
+- **`errors`** contains validation errors for the fields.
+
+### 2. `register()`
+
+```jsx
+<input
+  {...register("name", {
+    required: "Name is required",
+  })}
+/>
+```
+
+The `register()` method connects the input field to React Hook Form.
+
+Here, `name` identifies the field, and `required` defines a validation rule.
+
+If the user submits the form without entering a name, the validation error appears.
+
+### 3. `handleSubmit()`
+
+```jsx
+const onSubmit = (data) => {
+  console.log(data);
+};
+```
+
+```jsx
+<form onSubmit={handleSubmit(onSubmit)}>
+```
+
+`handleSubmit()` handles form submission. It validates the registered fields before calling `onSubmit` with the form data.
+
+If validation fails, the submission callback is not called.
+
+### 4. `formState.errors`
+
+```jsx
+{
+  errors.name && <p>{errors.name.message}</p>;
+}
+```
+
+The `errors` object stores validation errors.
+
+If the name field is empty, the message `Name is required` is displayed.
+
+### 5. Validation Rules
+
+```jsx
+register("password", {
+  required: "Password is required",
+  minLength: {
+    value: 6,
+    message: "Password must contain at least 6 characters",
+  },
+});
+```
+
+This validates the password and displays an error if it is empty or shorter than six characters.
+
+## When to Use React Hook Form
+
+- When building forms with multiple input fields.
+- When you need efficient form handling.
+- When you need built-in validation support.
+- When you want to reduce unnecessary re-renders.
+- When integrating with validation libraries such as Zod or Yup.
+
+---
+
+# Formik
+
+**Formik** is a library for managing forms in React. It provides tools for handling form values, validation, submission, and error messages through a consistent API.
+
+Formik commonly uses controlled inputs, meaning React state tracks the form values as the user types.
+
+It simplifies form management by providing methods and components instead of requiring you to write all the form logic manually.
+
+## Key Features
+
+- Manages form values and errors.
+- Handles form submission.
+- Supports synchronous and asynchronous validation.
+- Supports schema-based validation using libraries such as Yup.
+- Provides helpers for tracking whether fields have been touched.
+- Reduces repetitive form-handling code.
+
+## Installation
+
+Install Formik using npm:
+
+```bash
+npm install formik
+```
+
+For schema-based validation using Yup:
+
+```bash
+npm install yup
+```
+
+## Example: Registration Form
+
+```jsx
+import { useFormik } from "formik";
+import * as Yup from "yup";
+
+function RegistrationForm() {
+  const formik = useFormik({
+    initialValues: {
+      name: "",
+      email: "",
+      password: "",
+    },
+
+    validationSchema: Yup.object({
+      name: Yup.string().required("Name is required"),
+
+      email: Yup.string()
+        .email("Invalid email address")
+        .required("Email is required"),
+
+      password: Yup.string()
+        .min(6, "Password must contain at least 6 characters")
+        .required("Password is required"),
+    }),
+
+    onSubmit: (values) => {
+      console.log("Form Data:", values);
+    },
+  });
+
+  return (
+    <form onSubmit={formik.handleSubmit}>
+      <div>
+        <label htmlFor="name">Name:</label>
+
+        <input
+          id="name"
+          name="name"
+          value={formik.values.name}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+        />
+
+        {formik.touched.name && formik.errors.name && (
+          <p>{formik.errors.name}</p>
+        )}
+      </div>
+
+      <div>
+        <label htmlFor="email">Email:</label>
+
+        <input
+          id="email"
+          name="email"
+          type="email"
+          value={formik.values.email}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+        />
+
+        {formik.touched.email && formik.errors.email && (
+          <p>{formik.errors.email}</p>
+        )}
+      </div>
+
+      <div>
+        <label htmlFor="password">Password:</label>
+
+        <input
+          id="password"
+          name="password"
+          type="password"
+          value={formik.values.password}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+        />
+
+        {formik.touched.password && formik.errors.password && (
+          <p>{formik.errors.password}</p>
+        )}
+      </div>
+
+      <button type="submit">Register</button>
+    </form>
+  );
+}
+
+export default RegistrationForm;
+```
+
+## Explanation
+
+### 1. `useFormik()`
+
+```jsx
+const formik = useFormik({
+  initialValues: {
+    name: "",
+    email: "",
+    password: "",
+  },
+  onSubmit: (values) => {
+    console.log(values);
+  },
+});
+```
+
+The `useFormik()` hook creates a form controller that manages form values, validation, and submission.
+
+### 2. `initialValues`
+
+```jsx
+initialValues: {
+  name: "",
+  email: "",
+  password: "",
+}
+```
+
+`initialValues` defines the initial values of the form fields.
+
+In this example, all fields start with empty strings.
+
+### 3. `formik.handleChange`
+
+```jsx
+onChange={formik.handleChange}
+```
+
+This updates the corresponding form value whenever the user types.
+
+Formik identifies the field using its `name` attribute.
+
+### 4. `formik.handleBlur`
+
+```jsx
+onBlur={formik.handleBlur}
+```
+
+This tracks when a user leaves an input field.
+
+Formik uses this information to update the `touched` state, which helps determine when to display validation errors.
+
+### 5. `validationSchema`
+
+```jsx
+validationSchema: Yup.object({
+  email: Yup.string()
+    .email("Invalid email address")
+    .required("Email is required"),
+});
+```
+
+The validation schema defines rules for form fields.
+
+Here, the email must be valid and cannot be empty.
+
+### 6. `formik.errors` and `formik.touched`
+
+```jsx
+{
+  formik.touched.email && formik.errors.email && <p>{formik.errors.email}</p>;
+}
+```
+
+- **`formik.errors`** contains validation error messages.
+- **`formik.touched`** tracks whether the user has interacted with a field and left it.
+
+Using both helps avoid displaying errors before the user interacts with the field.
+
+### 7. `formik.handleSubmit`
+
+```jsx
+<form onSubmit={formik.handleSubmit}>
+```
+
+Formik handles form submission, runs the configured validation, and calls `onSubmit` with the form values when validation succeeds.
+
+## When to Use Formik
+
+- When you need a structured approach to form management.
+- When working with controlled inputs.
+- When you need field-level or schema-based validation.
+- When maintaining an existing project that already uses Formik.
+- When you prefer Formik's form state and helper APIs.
+
+---
+
+# Formisch
+
+**Formisch** is a form library designed to simplify form state management, validation, and submission while keeping the amount of boilerplate code low.
+
+It provides tools for working with form values, tracking validation errors, and handling form interactions.
+
+Formisch uses a schema-oriented approach to form validation and supports integrations with compatible validation tools. Its API differs from React Hook Form and Formik, so its hooks and components should be used according to the version of Formisch installed.
+
+## Key Features
+
+- Helps manage form values and validation.
+- Supports displaying validation errors.
+- Provides tools for handling form submission.
+- Helps simplify form state management.
+- Can be used to build reusable form logic.
+
+## Installation
+
+Check the installation instructions for the specific Formisch package and version you plan to use before adding it to your project.
+
+## Example: Basic Form Structure
+
+The following example illustrates the general structure of a form. It uses React state to demonstrate form input handling; it is **not a Formisch-specific implementation**.
+
+```jsx
+import { useState } from "react";
+
+function RegistrationForm() {
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    if (!name.trim()) {
+      setError("Name is required");
+      return;
+    }
+
+    setError("");
+    console.log("Submitted name:", name);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <label htmlFor="name">Name:</label>
+
+      <input
+        id="name"
+        value={name}
+        onChange={(event) => setName(event.target.value)}
+      />
+
+      {error && <p>{error}</p>}
+
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+
+export default RegistrationForm;
+```
+
+## Explanation
+
+1. `useState()` stores the input value and error message.
+2. `onChange` updates the name whenever the user types.
+3. `handleSubmit()` checks whether the name is empty.
+4. `setError()` updates the error message.
+5. If the name is valid, the form data is logged.
+
+**Important:** This example demonstrates ordinary React form handling, not Formisch's actual API. Refer to the installed version's documentation for a correct Formisch-specific example.
+
+## When to Consider Formisch
+
+- When exploring alternative form-management libraries.
+- When you want a lightweight approach to form state and validation.
+- When its API and validation approach fit your application's requirements.
+
+---
+
+# React Hook Form vs Formik vs Formisch
+
+| Feature                | React Hook Form                             | Formik                                                   | Formisch                                                 |
+| ---------------------- | ------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------- |
+| Main purpose           | Form state and validation                   | Form state and validation                                | Form state and validation                                |
+| Input handling         | Uncontrolled by default                     | Commonly controlled                                      | Depends on its API and integration                       |
+| Performance            | Designed to minimise unnecessary re-renders | Controlled state updates can cause additional re-renders | Depends on implementation                                |
+| Validation             | Built-in rules and schema integrations      | Built-in validation support and schema integrations      | Depends on the installed version and integrations        |
+| React state management | Abstracted through form methods             | Managed through Formik state                             | Depends on its API                                       |
+| Best suited for        | Forms where efficient updates are important | Structured form management and existing Formik projects  | Projects where its API and features fit the requirements |
+
+## Final Summary
+
+- **React Forms:** The basic approach to collecting and validating user input.
+- **React Hook Form:** A popular choice when you want efficient form handling with minimal re-renders.
+- **Formik:** A structured form-management library with controlled inputs and a consistent API.
+- **Formisch:** An alternative form library whose exact APIs and features should be checked against its installed version.
+
+**Recommendation:** For a new React application, consider React Hook Form when you need efficient form handling and validation. Formik is also a reasonable choice, particularly for existing projects that already use it.
+
+# Controlled Components vs Uncontrolled Components
+
+In React, **controlled components** and **uncontrolled components** are two ways to manage form input values.
+
+The main difference is how the input values are managed and accessed.
+
+- **Controlled Components:** React state manages the input values.
+- **Uncontrolled Components:** The DOM manages the input values, and React can access them using refs.
+
+---
+
+# 1. Controlled Components
+
+A **controlled component** is a form element whose value is controlled by React state.
+
+Whenever the user types something into the input field, an event handler updates the state. React then uses the updated state to display the current value.
+
+### Example
+
+```jsx
+import { useState } from "react";
+
+function ControlledForm() {
+  const [name, setName] = useState("");
+
+  const handleChange = (event) => {
+    setName(event.target.value);
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    console.log("Name:", name);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <label htmlFor="name">Name:</label>
+
+      <input id="name" type="text" value={name} onChange={handleChange} />
+
+      <p>Entered Name: {name}</p>
+
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+
+export default ControlledForm;
+```
+
+### How It Works
+
+1. **`useState("")`** creates a state variable named `name` with an initial empty string.
+2. **`value={name}`** makes the input value depend on React state.
+3. **`onChange={handleChange}`** calls the event handler whenever the user types.
+4. **`event.target.value`** retrieves the current input value.
+5. **`setName()`** updates the React state.
+6. React re-renders the component with the updated value.
+7. **`handleSubmit()`** accesses the latest name from the state when the form is submitted.
+
+### Example Flow
+
+Suppose the user types `Kamesh`.
+
+```text
+User types "K"
+      ↓
+onChange event fires
+      ↓
+setName("K")
+      ↓
+React updates the state
+      ↓
+Input displays "K"
+      ↓
+The process repeats for each character
+```
+
+### Advantages
+
+- Easy to validate input while the user types.
+- Easy to show conditional messages based on input values.
+- Easy to enable or disable buttons based on form values.
+- Form values are directly available in React state.
+- Useful when multiple UI elements depend on the same input.
+
+### Disadvantages
+
+- Requires additional state and event-handling code.
+- State updates can cause re-renders while typing.
+- Managing many fields manually can make the component complex.
+
+### When to Use Controlled Components
+
+Use controlled components when:
+
+- You need real-time form validation.
+- You want to display input values elsewhere in the UI.
+- You need to enable or disable buttons based on user input.
+- You want to control the input value programmatically.
+
+---
+
+# 2. Uncontrolled Components
+
+An **uncontrolled component** is a form element whose current value is managed by the DOM rather than React state.
+
+React does not need to update state on every keystroke. Instead, you can use a **ref** to access the input element and retrieve its current value when required.
+
+### Example
+
+```jsx
+import { useRef } from "react";
+
+function UncontrolledForm() {
+  const nameRef = useRef(null);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    console.log("Name:", nameRef.current.value);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <label htmlFor="name">Name:</label>
+
+      <input id="name" type="text" ref={nameRef} defaultValue="" />
+
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+
+export default UncontrolledForm;
+```
+
+### How It Works
+
+1. **`useRef(null)`** creates a ref to hold a reference to the input element.
+2. **`ref={nameRef}`** connects the ref to the input element.
+3. **`defaultValue=""`** sets the initial input value.
+4. The user types directly into the input, and the DOM maintains its current value.
+5. When the form is submitted, **`nameRef.current.value`** retrieves the current input value.
+6. React state is not required to store the input value.
+
+### Example Flow
+
+Suppose the user types `Kamesh`.
+
+```text
+User types "Kamesh"
+        ↓
+DOM updates the input value
+        ↓
+React state is not updated for each keystroke
+        ↓
+User clicks Submit
+        ↓
+nameRef.current.value retrieves "Kamesh"
+```
+
+### Advantages
+
+- Requires less state-management code for simple forms.
+- Does not need React state updates for every keystroke.
+- Useful when you only need input values during form submission.
+- Can simplify forms with a small number of fields.
+
+### Disadvantages
+
+- Real-time validation requires additional logic.
+- Input values are not directly available through React state.
+- Displaying live updates elsewhere in the component requires additional handling.
+- Managing complex form behaviour can become difficult without a suitable form library.
+
+### When to Use Uncontrolled Components
+
+Use uncontrolled components when:
+
+- You only need input values when submitting a form.
+- You are building a simple form.
+- You need to integrate with DOM-based libraries.
+- You want to access an input directly using a ref.
+
+---
+
+# 3. Key Differences
+
+| Feature                 | Controlled Components                      | Uncontrolled Components                                |
+| ----------------------- | ------------------------------------------ | ------------------------------------------------------ |
+| Value management        | React state                                | DOM                                                    |
+| Accessing values        | State variables                            | Refs or DOM form APIs                                  |
+| Updating values         | State updates through event handlers       | DOM updates input values                               |
+| Main prop               | `value`                                    | `defaultValue`                                         |
+| Input handling          | Usually uses `onChange`                    | Does not require `onChange` for basic value collection |
+| Real-time validation    | Easy to implement                          | Requires additional handling                           |
+| Re-renders while typing | State updates generally trigger re-renders | Typing alone does not trigger a React re-render        |
+| Code complexity         | Can require more state-management code     | Often simpler for basic forms                          |
+| Best suited for         | Dynamic forms and real-time validation     | Simple forms and direct DOM access                     |
+
+**Important:** Both approaches can use `onSubmit` to handle form submission. The difference is how the input values are managed before submission.
+
+---
+
+# 4. Practical Example: Resetting Input Values
+
+### Controlled Component
+
+You can reset a controlled input by updating its state.
+
+```jsx
+import { useState } from "react";
+
+function ControlledReset() {
+  const [name, setName] = useState("");
+
+  const handleReset = () => {
+    setName("");
+  };
+
+  return (
+    <div>
+      <input value={name} onChange={(event) => setName(event.target.value)} />
+
+      <button onClick={handleReset}>Reset</button>
+    </div>
+  );
+}
+
+export default ControlledReset;
+```
+
+**Explanation:** Calling `setName("")` updates the state, so the input becomes empty.
+
+### Uncontrolled Component
+
+You can reset an uncontrolled input using a ref.
+
+```jsx
+import { useRef } from "react";
+
+function UncontrolledReset() {
+  const nameRef = useRef(null);
+
+  const handleReset = () => {
+    nameRef.current.value = "";
+  };
+
+  return (
+    <div>
+      <input ref={nameRef} defaultValue="" />
+
+      <button onClick={handleReset}>Reset</button>
+    </div>
+  );
+}
+
+export default UncontrolledReset;
+```
+
+**Explanation:** The ref provides access to the input element, allowing you to clear its value directly.
+
+---
+
+# 5. Which Approach Should You Choose?
+
+Choose **controlled components** when you need more control over the input values.
+
+For example:
+
+- Live search.
+- Real-time validation.
+- Dynamic forms.
+- Forms where one input affects another.
+
+Choose **uncontrolled components** when you only need to collect input values without tracking every change in React state.
+
+For example:
+
+- Simple contact forms.
+- Basic forms that collect values during submission.
+- Forms that interact with DOM-based libraries.
+
+## Interview Tip
+
+**Question: What is the main difference between controlled and uncontrolled components in React?**
+
+**Answer:** Controlled components store their input values in React state and update them through event handlers. Uncontrolled components allow the DOM to manage input values, which can be accessed using refs when needed.
+
+# SSR Frameworks
+
+**SSR (Server-Side Rendering)** is a technique in which HTML is generated on the server and sent to the browser. The browser can display the generated HTML before the client-side JavaScript finishes loading.
+
+A framework built on top of React adds extra structure and features, such as routing, server-side rendering, data loading, and file-based page organization, that React itself does not provide.
+
+Choosing a framework can save development time by providing built-in features and a consistent project structure.
+
+## Key Features of SSR Frameworks
+
+- **Server-Side Rendering (SSR):** Generates HTML on the server for a request.
+- **Static Site Generation (SSG):** Generates HTML pages at build time.
+- **Routing:** Maps URLs to pages or components.
+- **Data Fetching:** Provides mechanisms to load data for pages.
+- **SEO Support:** Can make page content available in the initial HTML, helping search engines discover content.
+- **Performance Optimisation:** Provides features such as code splitting, caching, and optimised assets.
+
+## Popular React Frameworks
+
+- **React Router:** Supports client-side routing and also provides framework features for building full-stack web applications.
+- **Next.js:** Provides routing, rendering strategies, data fetching, and other production-ready features.
+
+---
+
+# React Router
+
+**React Router** is a routing library for React that also offers a framework mode for building complete web applications.
+
+In its library mode, it helps developers navigate between pages without reloading the entire browser page. In framework mode, it adds features such as file-based routing, data loading, actions, server rendering, and route-level code splitting.
+
+## Key Features
+
+- **Client-Side Routing:** Navigates between pages without a full browser reload.
+- **Nested Routes:** Allows child routes to render inside parent layouts.
+- **Data Loading:** Loads route data before rendering the relevant UI.
+- **Actions:** Handles operations such as form submissions and data mutations.
+- **Server Rendering:** Supports server-side rendering in framework mode.
+- **Route-Based Organisation:** Organises application pages and layouts around routes.
+
+## Example: Basic Routing
+
+Install React Router:
+
+```bash
+npm install react-router
+```
+
+Create an application with two routes:
+
+```jsx
+import { BrowserRouter, Routes, Route, Link } from "react-router";
+
+function Home() {
+  return <h1>Home Page</h1>;
+}
+
+function About() {
+  return <h1>About Page</h1>;
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <nav>
+        <Link to="/">Home</Link>
+        <Link to="/about">About</Link>
+      </nav>
+
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;
+```
+
+### Explanation
+
+1. **`BrowserRouter`** enables browser-based routing.
+2. **`Routes`** groups the route definitions.
+3. **`Route`** maps a URL path to a React component.
+4. **`Link`** navigates between routes without a full page reload.
+5. When the user visits `/about`, the `About` component is displayed.
+
+**Note:** This example demonstrates React Router's library mode, not its full framework mode.
+
+## When to Use React Router
+
+- When adding routing to an existing React application.
+- When building single-page applications.
+- When you need nested layouts and route-based data loading.
+- When you want to use React Router's framework features for a more structured application.
+
+---
+
+# Next.js
+
+**Next.js** is a React framework that provides routing, rendering strategies, data fetching, and optimisation features for building web applications.
+
+It supports server-side rendering, static generation, and client-side interactivity. It also provides file-based routing, so developers can create routes by organising files and folders.
+
+Next.js is widely used for production applications that need good performance, search engine visibility, and a structured development environment.
+
+## Key Features
+
+- **File-Based Routing:** Creates routes based on the project's file and folder structure.
+- **Server-Side Rendering (SSR):** Generates HTML on the server for a request when using the appropriate rendering approach.
+- **Static Site Generation (SSG):** Generates pages at build time.
+- **React Server Components:** Allows components to render on the server by default in the App Router.
+- **Client Components:** Supports interactive features such as event handlers and browser APIs.
+- **Data Fetching:** Provides ways to retrieve data in Server Components and other supported contexts.
+- **Image Optimisation:** Provides the `next/image` component for optimised image delivery.
+- **SEO Support:** Supports metadata configuration for search engines and social sharing.
+
+## Example: File-Based Routing
+
+In Next.js, you can create pages by adding files to the `app` directory.
+
+### Project Structure
+
+```text
+my-app/
+├── app/
+│   ├── layout.jsx
+│   ├── page.jsx
+│   └── about/
+│       └── page.jsx
+├── package.json
+└── next.config.js
+```
+
+### 1. Home Page
+
+**File:** `app/page.jsx`
+
+```jsx
+export default function HomePage() {
+  return <h1>Welcome to the Home Page</h1>;
+}
+```
+
+This file creates the `/` route.
+
+### 2. About Page
+
+**File:** `app/about/page.jsx`
+
+```jsx
+export default function AboutPage() {
+  return <h1>Welcome to the About Page</h1>;
+}
+```
+
+This file creates the `/about` route.
+
+### 3. Root Layout
+
+**File:** `app/layout.jsx`
+
+```jsx
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+The root layout provides the common HTML structure for the application's pages.
+
+### How It Works
+
+1. Next.js identifies route files inside the `app` directory.
+2. `app/page.jsx` represents the home page.
+3. `app/about/page.jsx` represents the About page.
+4. The root layout wraps the page content.
+5. Next.js renders the page using the configured rendering strategy.
+
+**Important:** Creating a page in Next.js does not automatically mean it uses traditional request-time SSR. Depending on the page and configuration, Next.js can use static rendering, dynamic server rendering, or client-side updates.
+
+## Example: Server-Side Data Fetching
+
+In the Next.js App Router, an asynchronous Server Component can fetch data on the server.
+
+```jsx
+export default async function UsersPage() {
+  const response = await fetch("https://jsonplaceholder.typicode.com/users");
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch users");
+  }
+
+  const users = await response.json();
+
+  return (
+    <div>
+      <h1>Users</h1>
+
+      <ul>
+        {users.map((user) => (
+          <li key={user.id}>{user.name}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+### Explanation
+
+1. The asynchronous Server Component requests user data.
+2. `await response.json()` converts the response into JavaScript data.
+3. The component renders a list of users.
+4. The server can render the resulting HTML before sending it to the browser.
+
+This example uses the App Router's Server Component model. Actual caching and rendering behaviour depends on the Next.js version and configuration.
+
+## When to Use Next.js
+
+- When building SEO-friendly websites.
+- When developing e-commerce applications.
+- When building blogs, content websites, and marketing pages.
+- When you need server-side data fetching.
+- When you want routing and rendering features integrated into one framework.
+- When building full-stack applications with React and server-side functionality.
+
+---
+
+# React Router vs Next.js
+
+| Feature                | React Router                                                | Next.js                                                                |
+| ---------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Main purpose           | Routing library with an optional framework mode             | Full React framework                                                   |
+| Routing                | Route configuration or framework conventions                | File-based routing                                                     |
+| Client-side navigation | Supported                                                   | Supported                                                              |
+| Server-side rendering  | Supported in framework mode                                 | Supported                                                              |
+| Static generation      | Depends on the framework setup                              | Supported                                                              |
+| Data loading           | Route loaders and framework data APIs                       | Server Components and other data-fetching approaches                   |
+| Form actions           | Supported through route actions and framework features      | Supported through mechanisms such as Server Actions and Route Handlers |
+| Project structure      | Flexible in library mode; more structured in framework mode | Provides an established framework structure                            |
+| Best suited for        | Adding routing or using React Router's framework mode       | Building applications with integrated routing and rendering features   |
+
+## Final Summary
+
+- **SSR Frameworks:** Provide rendering, routing, and other features that help build production-ready React applications.
+- **React Router:** Best known for routing, with additional data and rendering capabilities in framework mode.
+- **Next.js:** A full React framework with file-based routing, server rendering, static generation, and other built-in features.
+
+**Interview Tip:** React is a UI library, while Next.js is a full framework built on React. React Router is primarily a routing library, but its framework mode extends beyond client-side navigation to support more complete application development.
+
+# Types & Validation
+
+Types and validation in a React application help catch mistakes early and ensure that data matches the expected structure.
+
+Data can come from different sources, such as user input, API responses, component props, and configuration files. Type checking and validation help ensure that this data is used correctly.
+
+**Static type checking** checks types during development and compilation, while **runtime validation** checks actual data when the application runs. Both approaches can be used together to improve application reliability.
+
+## Key Concepts
+
+- **Static Typing:** Checks whether values are used according to their declared types.
+- **Runtime Validation:** Checks whether actual data satisfies specific rules while the application runs.
+- **Type Safety:** Helps prevent operations involving incompatible data types.
+- **Schema Validation:** Defines the expected structure and rules for data.
+- **Type Inference:** Automatically determines a value's type based on its value or definition.
+
+## Why Do We Need Types and Validation?
+
+- To catch programming mistakes early.
+- To ensure API responses match the expected structure.
+- To validate user input before processing it.
+- To improve code readability and maintainability.
+- To reduce errors when passing data between components.
+- To make large React applications easier to manage.
+
+---
+
+# TypeScript
+
+**TypeScript** is a superset of JavaScript that adds static typing and other development features. TypeScript helps developers identify type-related errors before running their applications.
+
+In React, TypeScript is commonly used to define the types of component props, state variables, event handlers, and function parameters.
+
+TypeScript code is generally transformed into JavaScript before execution.
+
+## Key Features
+
+- **Static Type Checking:** Detects many type-related mistakes during development.
+- **Type Inference:** Automatically determines types when possible.
+- **Interfaces and Types:** Define the expected structure of objects.
+- **Generics:** Create reusable functions and components that work with different types.
+- **React Integration:** Supports typing props, state, events, and hooks.
+- **Editor Support:** Provides better autocomplete and error detection in supported editors.
+
+## Installation
+
+To create a new React project using TypeScript with Vite:
+
+```bash
+npm create vite@latest my-app -- --template react-ts
+```
+
+Navigate to the project and install dependencies:
+
+```bash
+cd my-app
+npm install
+npm run dev
+```
+
+## Example 1: Basic TypeScript
+
+```typescript
+let username: string = "Kamesh";
+let age: number = 25;
+let isDeveloper: boolean = true;
+
+console.log(username);
+console.log(age);
+console.log(isDeveloper);
+```
+
+### Explanation
+
+- `string` allows string values.
+- `number` allows numeric values.
+- `boolean` allows `true` or `false`.
+
+If you try to assign a value of the wrong type, TypeScript reports a type error.
+
+```typescript
+let age: number = 25;
+
+// TypeScript error
+age = "Twenty-five";
+```
+
+**Note:** TypeScript catches this error during type checking. Type annotations are generally removed from the generated JavaScript, so they do not validate data at runtime.
+
+## Example 2: TypeScript in React Props
+
+Props allow a parent component to pass data to a child component.
+
+TypeScript can define which props a component expects and what types those props should have.
+
+```tsx
+type UserProps = {
+  name: string;
+  age: number;
+};
+
+function User({ name, age }: UserProps) {
+  return (
+    <div>
+      <h2>Name: {name}</h2>
+      <p>Age: {age}</p>
+    </div>
+  );
+}
+
+export default function App() {
+  return <User name="Kamesh" age={25} />;
+}
+```
+
+### Explanation
+
+**1. Define the props type**
+
+```tsx
+type UserProps = {
+  name: string;
+  age: number;
+};
+```
+
+This defines an object with two required properties:
+
+- `name` must be a string.
+- `age` must be a number.
+
+**2. Apply the type to the component**
+
+```tsx
+function User({ name, age }: UserProps);
+```
+
+This tells TypeScript that the component expects props matching `UserProps`.
+
+**3. Pass the props**
+
+```tsx
+<User name="Kamesh" age={25} />
+```
+
+TypeScript checks whether the supplied props match the declared types.
+
+For example, passing `age="25"` produces a type error because the value is a string rather than a number.
+
+## Example 3: TypeScript with React State
+
+The `useState` hook can work with TypeScript to maintain a specific state type.
+
+```tsx
+import { useState } from "react";
+
+function Counter() {
+  const [count, setCount] = useState<number>(0);
+
+  return (
+    <div>
+      <h2>Count: {count}</h2>
+
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  );
+}
+
+export default Counter;
+```
+
+### Explanation
+
+- `useState<number>(0)` defines the state as a number.
+- `count` stores the current value.
+- `setCount()` updates the value.
+- TypeScript helps prevent assigning incompatible values to the state.
+
+## When to Use TypeScript
+
+- When building large React applications.
+- When multiple developers work on the same project.
+- When you want type checking for component props and state.
+- When you need better editor autocomplete and refactoring support.
+- When maintaining complex data structures and API integrations.
+
+---
+
+# Zod
+
+**Zod** is a schema validation library designed for TypeScript and JavaScript. It allows developers to define schemas that describe the expected structure of data and validate actual values at runtime.
+
+Zod can also infer TypeScript types from schemas, reducing the need to maintain separate type definitions and validation rules.
+
+## Key Features
+
+- **Runtime Validation:** Checks actual data against defined rules.
+- **Schema Definition:** Defines the expected structure of objects and other values.
+- **Type Inference:** Generates TypeScript types from schemas.
+- **Error Reporting:** Provides detailed validation errors.
+- **Object Validation:** Checks the types and requirements of object properties.
+- **Form Integration:** Works with form libraries such as React Hook Form.
+- **API Validation:** Can validate data received from APIs.
+
+## Installation
+
+```bash
+npm install zod
+```
+
+## Example 1: Basic Zod Validation
+
+```typescript
+import { z } from "zod";
+
+const userSchema = z.object({
+  name: z.string(),
+  age: z.number(),
+  email: z.email(),
+});
+
+const user = {
+  name: "Kamesh",
+  age: 25,
+  email: "kamesh@example.com",
+};
+
+const result = userSchema.safeParse(user);
+
+if (result.success) {
+  console.log("Valid user:", result.data);
+} else {
+  console.log("Validation errors:", result.error.issues);
+}
+```
+
+### Explanation
+
+**1. Define the schema**
+
+```typescript
+const userSchema = z.object({
+  name: z.string(),
+  age: z.number(),
+  email: z.email(),
+});
+```
+
+This schema expects an object containing:
+
+- `name`: A string.
+- `age`: A number.
+- `email`: A valid email address.
+
+**2. Validate the data**
+
+```typescript
+const result = userSchema.safeParse(user);
+```
+
+`safeParse()` checks whether the supplied data matches the schema without throwing an exception for ordinary validation failures.
+
+**3. Check the result**
+
+```typescript
+if (result.success) {
+  console.log(result.data);
+} else {
+  console.log(result.error.issues);
+}
+```
+
+- If validation succeeds, `result.data` contains the validated data.
+- If validation fails, `result.error.issues` contains information about the validation errors.
+
+## Example 2: Zod with TypeScript
+
+One of Zod's main advantages is that it can infer a TypeScript type from a schema.
+
+```typescript
+import { z } from "zod";
+
+const userSchema = z.object({
+  name: z.string(),
+  age: z.number(),
+  email: z.email(),
+});
+
+type User = z.infer<typeof userSchema>;
+
+const user: User = {
+  name: "Kamesh",
+  age: 25,
+  email: "kamesh@example.com",
+};
+```
+
+### Explanation
+
+```typescript
+type User = z.infer<typeof userSchema>;
+```
+
+This generates the TypeScript type from the schema.
+
+You do not need to separately write the same structure in a TypeScript interface or type definition.
+
+**Important:** Type inference provides compile-time type information, while `safeParse()` performs runtime validation. Both serve different purposes.
+
+## Example 3: Zod with React Form Validation
+
+Zod can validate form input before the application processes the submitted data.
+
+```tsx
+import { useState } from "react";
+import { z } from "zod";
+
+const loginSchema = z.object({
+  email: z.email("Enter a valid email address"),
+  password: z.string().min(6, "Password must contain at least 6 characters"),
+});
+
+function LoginForm() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const result = loginSchema.safeParse({
+      email,
+      password,
+    });
+
+    if (!result.success) {
+      setError(result.error.issues[0].message);
+      return;
+    }
+
+    setError("");
+    console.log("Valid form data:", result.data);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+      />
+
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(event) => setPassword(event.target.value)}
+      />
+
+      {error && <p>{error}</p>}
+
+      <button type="submit">Login</button>
+    </form>
+  );
+}
+
+export default LoginForm;
+```
+
+### Explanation
+
+1. React state stores the email and password.
+2. `loginSchema` defines the validation rules.
+3. When the user submits the form, `safeParse()` validates the values.
+4. If validation fails, the first error message is displayed.
+5. If validation succeeds, the validated data is available in `result.data`.
+
+**Note:** This example uses React state to collect input values and Zod to validate them. Zod can also be integrated with React Hook Form to manage form state and validation together.
+
+## When to Use Zod
+
+- When validating form inputs.
+- When validating API request or response data.
+- When you want runtime validation and TypeScript types from one schema.
+- When validating configuration objects.
+- When working with React Hook Form and schema-based validation.
+
+---
+
+# Valibot
+
+**Valibot** is a modular, type-safe schema validation library for JavaScript and TypeScript.
+
+It provides functions for defining validation rules, checking data at runtime, and inferring TypeScript types from schemas. Its modular design allows developers to import the specific validation functions they need.
+
+Valibot is useful when you want schema-based validation with a focus on a small bundle size and a modular API.
+
+## Key Features
+
+- **Runtime Validation:** Checks whether data matches a schema.
+- **Type Safety:** Supports TypeScript and inferred types.
+- **Modular Design:** Allows individual validation functions to be imported.
+- **Schema-Based Validation:** Defines rules for strings, numbers, objects, and other data.
+- **Error Handling:** Returns structured validation results.
+- **Form Integration:** Can be used with compatible React form libraries.
+- **API Validation:** Helps validate data received from external services.
+
+## Installation
+
+```bash
+npm install valibot
+```
+
+## Example 1: Basic Valibot Validation
+
+```typescript
+import * as v from "valibot";
+
+const UserSchema = v.object({
+  name: v.pipe(v.string(), v.minLength(1, "Name is required")),
+
+  age: v.pipe(v.number(), v.minValue(18, "Age must be at least 18")),
+
+  email: v.pipe(v.string(), v.email("Enter a valid email address")),
+});
+
+const user = {
+  name: "Kamesh",
+  age: 25,
+  email: "kamesh@example.com",
+};
+
+const result = v.safeParse(UserSchema, user);
+
+if (result.success) {
+  console.log("Valid user:", result.output);
+} else {
+  console.log("Validation errors:", result.issues);
+}
+```
+
+### Explanation
+
+**1. Define the schema**
+
+```typescript
+const UserSchema = v.object({
+  name: v.pipe(v.string(), v.minLength(1, "Name is required")),
+});
+```
+
+`v.object()` defines the expected object structure.
+
+`v.pipe()` combines validation steps into a pipeline.
+
+In this example:
+
+- `v.string()` checks that the value is a string.
+- `v.minLength(1)` checks that the string contains at least one character.
+
+**2. Validate the data**
+
+```typescript
+const result = v.safeParse(UserSchema, user);
+```
+
+`v.safeParse()` checks whether the supplied data satisfies the schema.
+
+**3. Handle the result**
+
+```typescript
+if (result.success) {
+  console.log(result.output);
+} else {
+  console.log(result.issues);
+}
+```
+
+- `result.output` contains the validated data when validation succeeds.
+- `result.issues` contains validation details when validation fails.
+
+## Example 2: Valibot with TypeScript
+
+Valibot can infer TypeScript types from its schemas.
+
+```typescript
+import * as v from "valibot";
+
+const UserSchema = v.object({
+  name: v.string(),
+  age: v.number(),
+  email: v.pipe(v.string(), v.email()),
+});
+
+type User = v.InferOutput<typeof UserSchema>;
+
+const user: User = {
+  name: "Kamesh",
+  age: 25,
+  email: "kamesh@example.com",
+};
+```
+
+### Explanation
+
+```typescript
+type User = v.InferOutput<typeof UserSchema>;
+```
+
+This derives the output TypeScript type from the Valibot schema.
+
+The schema defines the expected data structure, and TypeScript uses the inferred type to check how the data is used in the application.
+
+## Example 3: Valibot with React Form Validation
+
+The following example uses React state and Valibot to validate form input.
+
+```tsx
+import { useState } from "react";
+import * as v from "valibot";
+
+const LoginSchema = v.object({
+  email: v.pipe(v.string(), v.email("Enter a valid email address")),
+
+  password: v.pipe(
+    v.string(),
+    v.minLength(6, "Password must contain at least 6 characters"),
+  ),
+});
+
+function LoginForm() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const result = v.safeParse(LoginSchema, {
+      email,
+      password,
+    });
+
+    if (!result.success) {
+      setError(result.issues[0].message);
+      return;
+    }
+
+    setError("");
+    console.log("Valid form data:", result.output);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+      />
+
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(event) => setPassword(event.target.value)}
+      />
+
+      {error && <p>{error}</p>}
+
+      <button type="submit">Login</button>
+    </form>
+  );
+}
+
+export default LoginForm;
+```
+
+### Explanation
+
+1. The `LoginSchema` defines the expected email and password values.
+2. React state stores the user's input.
+3. `v.safeParse()` validates the submitted values.
+4. If validation fails, the first error message is displayed.
+5. If validation succeeds, the validated data is available in `result.output`.
+
+## When to Use Valibot
+
+- When you need runtime validation with TypeScript.
+- When you prefer a modular validation library.
+- When bundle size is an important consideration.
+- When validating forms, API data, or configuration objects.
+- When you want to infer TypeScript types from validation schemas.
+
+---
+
+# TypeScript vs Zod vs Valibot
+
+| Feature                          | TypeScript                                     | Zod                               | Valibot                           |
+| -------------------------------- | ---------------------------------------------- | --------------------------------- | --------------------------------- |
+| Main purpose                     | Static type checking                           | Runtime schema validation         | Runtime schema validation         |
+| Checks types during development  | Yes                                            | Through inferred TypeScript types | Through inferred TypeScript types |
+| Validates actual data at runtime | No, not by itself                              | Yes                               | Yes                               |
+| Defines schemas                  | Type definitions and interfaces                | Yes                               | Yes                               |
+| Infers TypeScript types          | Native type system                             | Yes                               | Yes                               |
+| Validates API responses          | Requires runtime validation for untrusted data | Yes                               | Yes                               |
+| Validates form input             | Type checking alone is insufficient            | Yes                               | Yes                               |
+| Modular validation functions     | Not applicable                                 | Schema-based API                  | Modular API                       |
+| Common use case                  | Props, state, and function types               | Forms and API validation          | Forms and API validation          |
+
+## Zod vs Valibot
+
+| Feature              | Zod                            | Valibot                                        |
+| -------------------- | ------------------------------ | ---------------------------------------------- |
+| API style            | Schema-oriented                | Modular, function-oriented                     |
+| Validation approach  | Schema definitions and parsing | Schema definitions and parsing                 |
+| Type inference       | `z.infer<typeof Schema>`       | `v.InferOutput<typeof Schema>`                 |
+| Validation method    | `safeParse(schemaData)`        | `safeParse(schema, data)`                      |
+| Error information    | `result.error.issues`          | `result.issues`                                |
+| Bundle size approach | Comprehensive schema API       | Modular design focused on reducing bundle size |
+
+---
+
+# Final Summary
+
+- **TypeScript:** Helps catch type-related mistakes during development. It does not automatically validate external data at runtime.
+- **Zod:** Defines schemas, validates actual data at runtime, and infers TypeScript types from schemas.
+- **Valibot:** Provides modular, type-safe schema validation with runtime checks and TypeScript type inference.
+
+## Recommended Approach
+
+For a React application, you can combine TypeScript with either Zod or Valibot.
+
+For example:
+
+1. Use **TypeScript** to define component props, state, and function parameters.
+2. Use **Zod or Valibot** to validate form input and external API data at runtime.
+3. Use the inferred schema types to reduce duplication between validation rules and TypeScript definitions.
+
+**Important:** TypeScript checks your code, while Zod and Valibot check actual data. Combining static type checking with runtime validation provides stronger protection against unexpected data.
+
+# Error Boundaries
+
+An **Error Boundary** is a React component that catches JavaScript errors thrown by its child components during rendering, lifecycle methods, and constructors of descendant components.
+
+It prevents errors in one part of the component tree from crashing the entire application. Instead of displaying a broken UI, an error boundary can show a **fallback UI**, such as an error message or a retry option.
+
+Error boundaries are useful for building reliable React applications because they allow developers to handle rendering errors gracefully.
+
+## Key Features
+
+- **Error Handling:** Catches errors in descendant components during rendering.
+- **Fallback UI:** Displays an alternative UI when an error occurs.
+- **Application Stability:** Prevents a rendering error in one section from taking down the entire component tree.
+- **Error Logging:** Allows developers to log errors for debugging.
+- **Component Isolation:** Different sections of an application can have separate error boundaries.
+
+## How Does an Error Boundary Work?
+
+1. React renders a component and its child components.
+2. If a descendant component throws an error during rendering, React looks for an error boundary above that component.
+3. The error boundary catches the error.
+4. React displays the fallback UI defined by the error boundary.
+5. The rest of the application outside that boundary can continue working.
+
+### Example Flow
+
+```text
+App
+ |
+ |--- Header
+ |
+ |--- Error Boundary
+ |       |
+ |       |--- User Profile
+ |       |
+ |       |--- Dashboard (Throws an Error)
+ |                    |
+ |                    X Error Occurs
+ |
+ |--- Fallback UI
+       "Something went wrong!"
+```
+
+The error boundary displays its fallback UI instead of the failed section.
+
+---
+
+# Creating an Error Boundary
+
+React error boundaries are traditionally implemented using **class components**.
+
+The two important lifecycle methods are:
+
+- **`getDerivedStateFromError()`**: Updates the component state to display the fallback UI.
+- **`componentDidCatch()`**: Receives information about the error and can be used to log it.
+
+## Example: Basic Error Boundary
+
+```jsx
+import React from "react";
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      hasError: false,
+    };
+  }
+
+  static getDerivedStateFromError(error) {
+    return {
+      hasError: true,
+    };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("Error caught:", error);
+    console.error("Error information:", errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <h2>Something went wrong!</h2>;
+    }
+
+    return this.props.children;
+  }
+}
+
+export default ErrorBoundary;
+```
+
+## Explanation
+
+### 1. `hasError` State
+
+```jsx
+this.state = {
+  hasError: false,
+};
+```
+
+This state determines whether the normal UI or fallback UI should be displayed.
+
+- `false`: Display the child components.
+- `true`: Display the fallback UI.
+
+### 2. `getDerivedStateFromError()`
+
+```jsx
+static getDerivedStateFromError(error) {
+  return {
+    hasError: true,
+  };
+}
+```
+
+React calls this method when a descendant component throws an error that the boundary can catch.
+
+It updates the state so that the boundary renders the fallback UI.
+
+**Important:** This method should remain pure. Use `componentDidCatch()` for error logging rather than logging inside `getDerivedStateFromError()`.
+
+### 3. `componentDidCatch()`
+
+```jsx
+componentDidCatch(error, errorInfo) {
+  console.error("Error caught:", error);
+  console.error("Error information:", errorInfo);
+}
+```
+
+This method receives:
+
+- **`error`**: The error that occurred.
+- **`errorInfo`**: Additional information about the component tree where the error occurred.
+
+You can use this method to log errors or send them to an error-monitoring service.
+
+### 4. Fallback UI
+
+```jsx
+if (this.state.hasError) {
+  return <h2>Something went wrong!</h2>;
+}
+```
+
+If an error occurs, the boundary displays the fallback UI instead of its children.
+
+### 5. Rendering Child Components
+
+```jsx
+return this.props.children;
+```
+
+If no error has been caught, the boundary renders its child components normally.
+
+---
+
+# Using an Error Boundary in React
+
+After creating the error boundary, wrap the components that you want to protect.
+
+## Example: App Component
+
+```jsx
+import ErrorBoundary from "./ErrorBoundary";
+import UserProfile from "./UserProfile";
+
+function App() {
+  return (
+    <div>
+      <h1>My Application</h1>
+
+      <ErrorBoundary>
+        <UserProfile />
+      </ErrorBoundary>
+    </div>
+  );
+}
+
+export default App;
+```
+
+### Explanation
+
+- `App` renders the application heading.
+- `ErrorBoundary` wraps the `UserProfile` component.
+- If `UserProfile` throws a render-time error, the boundary displays its fallback UI.
+- The heading outside the boundary can remain visible.
+
+**Best practice:** Place error boundaries around important application sections, such as dashboards, user profiles, and independent widgets, so one section's error does not unnecessarily affect the others.
+
+---
+
+# Example: A Component That Throws an Error
+
+```jsx
+function UserProfile() {
+  throw new Error("Failed to load user profile");
+
+  return <h2>User Profile</h2>;
+}
+
+export default UserProfile;
+```
+
+When React tries to render `UserProfile`, the component throws an error.
+
+The surrounding error boundary catches the rendering error and displays:
+
+```text
+Something went wrong!
+```
+
+**Note:** This is an intentionally simplified example for learning. In a real application, handle expected failures, such as API errors, through appropriate loading and error states rather than deliberately throwing errors.
+
+---
+
+# What Error Boundaries Do Not Catch
+
+Error boundaries do not catch every type of error.
+
+They generally do not catch errors in:
+
+- **Event handlers:** Errors thrown when a user clicks a button.
+- **Asynchronous code:** Errors thrown later in callbacks such as `setTimeout`.
+- **Promise rejections:** Rejected promises that are not handled by an error boundary.
+- **Server-side rendering:** Errors thrown while rendering on the server.
+- **The error boundary itself:** Errors thrown while the boundary is handling its own fallback UI are not caught by that same boundary.
+
+## Example: Error in an Event Handler
+
+```jsx
+function Button() {
+  const handleClick = () => {
+    throw new Error("Button click failed");
+  };
+
+  return <button onClick={handleClick}>Click Me</button>;
+}
+
+export default Button;
+```
+
+An error thrown by `handleClick` is not caught by a surrounding React error boundary.
+
+Handle such errors directly inside the event handler when necessary.
+
+```jsx
+function Button() {
+  const handleClick = () => {
+    try {
+      // Perform an operation that might fail.
+      throw new Error("Button click failed");
+    } catch (error) {
+      console.error("Click error:", error);
+    }
+  };
+
+  return <button onClick={handleClick}>Click Me</button>;
+}
+
+export default Button;
+```
+
+Here, the `try...catch` block handles the error within the event handler.
+
+---
+
+# Resetting an Error Boundary
+
+Once an error boundary catches an error, it normally continues displaying its fallback UI until its state is reset or the boundary is remounted.
+
+You can provide a retry button that resets the error state.
+
+## Example: Error Boundary with Reset
+
+```jsx
+import React from "react";
+
+class ErrorBoundary extends React.Component {
+  state = {
+    hasError: false,
+  };
+
+  static getDerivedStateFromError() {
+    return {
+      hasError: true,
+    };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("Error caught:", error, errorInfo);
+  }
+
+  handleReset = () => {
+    this.setState({
+      hasError: false,
+    });
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div>
+          <h2>Something went wrong!</h2>
+
+          <button onClick={this.handleReset}>Try Again</button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+export default ErrorBoundary;
+```
+
+### Explanation
+
+- When an error occurs, `hasError` becomes `true`.
+- The fallback UI appears with a **Try Again** button.
+- Clicking the button resets `hasError` to `false`.
+- React attempts to render the children again.
+
+**Important:** Resetting the boundary does not guarantee that the underlying error is fixed. If the child component still throws the same error, the fallback UI will appear again.
+
+---
+
+# Error Boundaries with Functional Components
+
+React does not provide a built-in hook that turns a function component into an error boundary.
+
+You can use a class component to implement the boundary and wrap functional components inside it.
+
+Alternatively, libraries such as `react-error-boundary` provide reusable components and hooks for error handling.
+
+## Installation
+
+```bash
+npm install react-error-boundary
+```
+
+## Example
+
+```jsx
+import { ErrorBoundary } from "react-error-boundary";
+
+function ErrorFallback({ error, resetErrorBoundary }) {
+  return (
+    <div role="alert">
+      <h2>Something went wrong!</h2>
+
+      <p>{error.message}</p>
+
+      <button onClick={resetErrorBoundary}>Try Again</button>
+    </div>
+  );
+}
+
+function UserProfile() {
+  // Replace this with your actual component logic.
+  return <h2>User Profile</h2>;
+}
+
+function App() {
+  return (
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <UserProfile />
+    </ErrorBoundary>
+  );
+}
+
+export default App;
+```
+
+### Explanation
+
+- **`ErrorBoundary`** catches errors from descendant components.
+- **`FallbackComponent`** defines the UI displayed when an error occurs.
+- **`error`** provides information about the error.
+- **`resetErrorBoundary`** resets the boundary so the children can be rendered again.
+
+The example above does not throw an error, so `UserProfile` renders normally. If it throws an error during rendering, the fallback component appears.
+
+---
+
+# Best Practices
+
+- Use error boundaries around important sections of your application.
+- Display a helpful fallback UI instead of exposing technical details to users.
+- Log errors so that developers can investigate them.
+- Provide a retry option when retrying is appropriate.
+- Use `try...catch` for errors in event handlers and asynchronous operations where needed.
+- Handle expected API failures through explicit error states.
+- Avoid placing the entire application inside only one boundary if independent sections should remain usable.
+- Do not assume that resetting a boundary will fix the underlying problem.
+
+---
+
+# Final Summary
+
+- **Error Boundary:** A React component that catches errors in descendant components during rendering and related lifecycle processing.
+- **`getDerivedStateFromError()`:** Updates state to display the fallback UI.
+- **`componentDidCatch()`:** Allows errors to be logged or reported.
+- **Fallback UI:** The alternative interface shown when an error occurs.
+- **Class Components:** React's traditional built-in way to implement error boundaries.
+- **`react-error-boundary`:** A library that provides reusable error-boundary components and related utilities.
+
+## Interview Question
+
+**Q: What is an Error Boundary in React, and why do we use it?**
+
+**Answer:** An error boundary is a React component that catches JavaScript errors thrown by its child components during rendering and displays a fallback UI instead of allowing the affected part of the component tree to fail without recovery. It is commonly implemented using `getDerivedStateFromError()` and `componentDidCatch()` in a class component.
+
+# Server APIs
+
+**Server APIs** in React are APIs provided by `react-dom/server` that allow developers to render React components into HTML on the server.
+
+Instead of rendering the entire application in the browser, React can generate HTML on the server and send it to the browser. The browser can display this HTML before the client-side JavaScript finishes loading.
+
+These APIs are mainly used when implementing **Server-Side Rendering (SSR)** and **Static Site Generation (SSG)**.
+
+Most React components do not need to import or use these APIs directly because frameworks such as Next.js handle server rendering internally.
+
+## Key Features
+
+- **Server-Side Rendering:** Converts React components into HTML on the server.
+- **Initial HTML Generation:** Generates HTML that can be sent to the browser.
+- **Performance:** Allows the browser to display rendered content before client-side JavaScript finishes loading.
+- **SEO Support:** Makes page content available in the initial HTML response.
+- **Framework Integration:** Frameworks can use these APIs internally to handle rendering.
+- **Static HTML Generation:** Supports generating HTML files during a build process.
+
+## Available Server APIs
+
+React provides several APIs through `react-dom/server`.
+
+| API                          | Description                                                |
+| ---------------------------- | ---------------------------------------------------------- |
+| `renderToString()`           | Renders a React tree into an HTML string.                  |
+| `renderToStaticMarkup()`     | Generates HTML that is not intended for React hydration.   |
+| `renderToPipeableStream()`   | Streams HTML using Node.js streams.                        |
+| `renderToReadableStream()`   | Streams HTML using Web Streams APIs.                       |
+| `renderToStaticNodeStream()` | Legacy API for generating a static HTML stream in Node.js. |
+| `renderToNodeStream()`       | Legacy API for rendering HTML to a Node.js stream.         |
+
+**Important:** `renderToNodeStream()` and `renderToStaticNodeStream()` are legacy APIs. For modern streaming server rendering, use the appropriate streaming API for your environment.
+
+---
+
+# 1. renderToString()
+
+**`renderToString()`** renders a React component tree into an HTML string on the server.
+
+The generated HTML can be sent to the browser as part of an HTTP response.
+
+## Example
+
+```jsx
+import React from "react";
+import { renderToString } from "react-dom/server";
+
+function App() {
+  return (
+    <div>
+      <h1>Welcome to React</h1>
+      <p>This HTML was generated on the server.</p>
+    </div>
+  );
+}
+
+const html = renderToString(<App />);
+
+console.log(html);
+```
+
+## Output
+
+```html
+<div>
+  <h1>Welcome to React</h1>
+  <p>This HTML was generated on the server.</p>
+</div>
+```
+
+## Explanation
+
+1. `App` defines the React component.
+2. `renderToString(<App />)` renders the component into an HTML string.
+3. The generated HTML can be included in a server response.
+4. The browser can display the HTML without waiting for React to render the page on the client.
+
+**Note:** `renderToString()` does not stream the response. It also does not wait for asynchronous data or Suspense content to finish loading; use the appropriate streaming API when streaming rendering is required.
+
+## When to Use
+
+- When you need to generate HTML on the server.
+- When integrating React into a custom server.
+- When building a simple server-rendering implementation.
+
+---
+
+# 2. renderToStaticMarkup()
+
+**`renderToStaticMarkup()`** generates an HTML string from React components without the additional markup intended to support React hydration.
+
+It is useful when you need static HTML that will not become an interactive React application on the client.
+
+## Example
+
+```jsx
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+
+function App() {
+  return (
+    <div>
+      <h1>Product Details</h1>
+      <p>Product: Laptop</p>
+      <p>Price: ₹50,000</p>
+    </div>
+  );
+}
+
+const html = renderToStaticMarkup(<App />);
+
+console.log(html);
+```
+
+## Output
+
+```html
+<div>
+  <h1>Product Details</h1>
+  <p>Product: Laptop</p>
+  <p>Price: ₹50,000</p>
+</div>
+```
+
+## Explanation
+
+1. `App` defines the static content.
+2. `renderToStaticMarkup()` converts the component into HTML.
+3. The generated HTML can be saved to a file or included in a response.
+4. The output is not intended to be hydrated into an interactive React tree.
+
+## When to Use
+
+- When generating static HTML.
+- When rendering React components for emails or other HTML output.
+- When the generated content does not need React interactivity.
+
+---
+
+# 3. renderToPipeableStream()
+
+**`renderToPipeableStream()`** renders a React component tree and streams the generated HTML through a Node.js writable stream.
+
+Streaming allows the server to send HTML progressively rather than waiting for the entire page to finish rendering.
+
+It is particularly useful for applications that use Suspense and need to progressively deliver content.
+
+## Example
+
+```jsx
+import React, { Suspense } from "react";
+import { renderToPipeableStream } from "react-dom/server";
+import { PassThrough } from "node:stream";
+
+function App() {
+  return (
+    <html>
+      <body>
+        <h1>My Application</h1>
+
+        <Suspense fallback={<p>Loading content...</p>}>
+          <p>Welcome to the application!</p>
+        </Suspense>
+      </body>
+    </html>
+  );
+}
+
+const stream = new PassThrough();
+
+const { pipe } = renderToPipeableStream(<App />, {
+  onShellReady() {
+    stream.setEncoding("utf8");
+
+    stream.on("data", (chunk) => {
+      console.log(chunk);
+    });
+
+    pipe(stream);
+  },
+
+  onError(error) {
+    console.error("Rendering error:", error);
+  },
+});
+```
+
+## Explanation
+
+- **`renderToPipeableStream()`** starts server-side rendering.
+- **`onShellReady()`** runs when the initial shell of the page is ready.
+- **`pipe()`** sends the rendered HTML into a Node.js writable stream.
+- **`Suspense`** allows a fallback to be displayed while suspended content is waiting to become available.
+- **`onError()`** provides a place to report rendering errors.
+
+This example demonstrates the streaming API. In a real HTTP server, the stream would normally be piped to the HTTP response, with appropriate status codes, headers, and error handling.
+
+## When to Use
+
+- When building a custom Node.js server.
+- When rendering pages with Suspense.
+- When you want to send HTML progressively.
+- When working with streaming SSR.
+
+---
+
+# 4. renderToReadableStream()
+
+**`renderToReadableStream()`** renders React components into a Web Readable Stream.
+
+It is designed for environments that support Web Streams, including modern web runtimes and supported server environments.
+
+## Example
+
+```jsx
+import React from "react";
+import { renderToReadableStream } from "react-dom/server";
+
+function App() {
+  return (
+    <div>
+      <h1>Server Rendering</h1>
+      <p>Rendered using a Web Readable Stream.</p>
+    </div>
+  );
+}
+
+async function renderApp() {
+  const stream = await renderToReadableStream(<App />);
+
+  const response = new Response(stream, {
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+    },
+  });
+
+  return response;
+}
+
+renderApp().then(async (response) => {
+  console.log(await response.text());
+});
+```
+
+## Explanation
+
+1. `renderToReadableStream()` starts rendering the React component tree.
+2. It returns a promise that resolves to a readable stream when the shell is ready.
+3. The stream can be used as the body of a web `Response`.
+4. The response contains the generated HTML.
+
+**Note:** The example uses the Web Streams and `Response` APIs, which are available in modern web runtimes. Streaming errors and Suspense completion can require additional handling in production.
+
+## When to Use
+
+- When building applications on Web Streams-compatible runtimes.
+- When working with serverless or edge environments that support the required APIs.
+- When you need streaming server-side rendering.
+
+---
+
+# How Server APIs Work
+
+The basic server-rendering process follows these steps:
+
+1. A request reaches the server.
+2. The server renders the React component tree using an appropriate server API.
+3. React generates HTML.
+4. The server sends the HTML to the browser.
+5. The browser displays the HTML.
+6. If the application uses client-side React, the browser can load JavaScript and hydrate the HTML to enable interactivity.
+
+## Example Flow
+
+```text
+Browser Request
+      |
+      v
+React Application on Server
+      |
+      v
+react-dom/server API
+      |
+      v
+Generated HTML
+      |
+      v
+HTML Response to Browser
+      |
+      v
+Browser Displays the Page
+      |
+      v
+React Hydration (when applicable)
+      |
+      v
+Interactive Application
+```
+
+**Hydration** is the process through which React attaches client-side behaviour to HTML that was already rendered on the server.
+
+Not every use of a server rendering API requires hydration. For example, static HTML generated with `renderToStaticMarkup()` is not intended to be hydrated.
+
+---
+
+# Server APIs vs Client Rendering
+
+| Feature                 | Server APIs                               | Client Rendering                                        |
+| ----------------------- | ----------------------------------------- | ------------------------------------------------------- |
+| Where rendering happens | Server                                    | Browser                                                 |
+| Main purpose            | Generate HTML on the server               | Render and update UI in the browser                     |
+| Common API              | `renderToString()`                        | `createRoot()`                                          |
+| Initial HTML            | Can be generated on the server            | Usually generated by client-side JavaScript             |
+| Hydration               | Can be used with hydratable server output | Not required when creating a fresh client-rendered root |
+| Common use case         | SSR and static HTML generation            | Interactive single-page applications                    |
+
+## Example: Client Rendering
+
+Client-side rendering typically uses `createRoot()` from `react-dom/client`.
+
+```jsx
+import { createRoot } from "react-dom/client";
+import App from "./App";
+
+createRoot(document.getElementById("root")).render(<App />);
+```
+
+This renders the React application in the browser.
+
+By comparison, server APIs generate HTML on the server.
+
+---
+
+# Best Practices
+
+- Use the server API appropriate for your runtime and rendering requirements.
+- Prefer streaming APIs when progressive HTML delivery is beneficial.
+- Use `renderToStaticMarkup()` when the generated HTML does not need React hydration.
+- Handle rendering errors and HTTP responses appropriately.
+- Avoid manually implementing server rendering when a framework already provides the required functionality.
+- Remember that server-rendered HTML does not automatically make browser-side event handlers interactive; hydration or client-side rendering is needed for interactivity.
+
+---
+
+# Final Summary
+
+- **Server APIs:** Render React components into HTML on the server.
+- **`renderToString()`:** Generates an HTML string.
+- **`renderToStaticMarkup()`:** Generates static HTML that is not intended for hydration.
+- **`renderToPipeableStream()`:** Streams HTML using Node.js streams.
+- **`renderToReadableStream()`:** Streams HTML using Web Streams.
+- **Hydration:** Makes server-rendered HTML interactive by attaching React to it on the client.
+
+**Interview Tip:** The main difference between `renderToString()` and `renderToStaticMarkup()` is that `renderToString()` produces HTML intended to support React hydration, while `renderToStaticMarkup()` produces HTML for static output that is not intended to be hydrated.
+
+# Suspense in React
+
+## What is Suspense?
+
+**Suspense** is a React feature that allows a component to wait for something before displaying its content. While waiting, React displays a **fallback UI**, such as a loading message or spinner.
+
+Suspense is commonly used for:
+
+- **Code splitting** with `React.lazy()`.
+- **Displaying loading indicators** while lazy-loaded components load.
+- **Handling data loading** when supported by a React framework or library.
+- **Streaming server-rendered content**.
+
+> **Important:** Suspense does not automatically detect data fetching in every `useEffect()` or API call. Data fetching must use a Suspense-compatible framework or library.
+
+---
+
+## 1. How Suspense Works
+
+Suspense uses a component called a **Suspense boundary** to define which part of the UI should display a fallback while waiting.
+
+### Example
+
+```jsx
+import { Suspense, lazy } from "react";
+
+const Dashboard = lazy(() => import("./Dashboard"));
+
+function App() {
+  return (
+    <div>
+      <h1>My Application</h1>
+
+      <Suspense fallback={<p>Loading dashboard...</p>}>
+        <Dashboard />
+      </Suspense>
+    </div>
+  );
+}
+
+export default App;
+```
+
+### Explanation
+
+- `lazy()` loads the `Dashboard` component when it is needed.
+- `<Suspense>` defines the boundary for the loading UI.
+- `fallback` specifies what to display while the component's code is loading.
+- Once the component finishes loading, React displays the `Dashboard` component.
+
+**Output while loading:**
+
+```text
+My Application
+Loading dashboard...
+```
+
+After loading, the dashboard content appears.
+
+---
+
+## 2. Suspense with React.lazy()
+
+`React.lazy()` allows you to load a component dynamically instead of including its code in the initial JavaScript bundle.
+
+### Without Lazy Loading
+
+```jsx
+import Dashboard from "./Dashboard";
+
+function App() {
+  return <Dashboard />;
+}
+```
+
+The `Dashboard` component is imported normally.
+
+### With Lazy Loading
+
+```jsx
+import { lazy, Suspense } from "react";
+
+const Dashboard = lazy(() => import("./Dashboard"));
+
+function App() {
+  return (
+    <Suspense fallback={<p>Loading...</p>}>
+      <Dashboard />
+    </Suspense>
+  );
+}
+
+export default App;
+```
+
+### Benefits
+
+- Reduces the amount of JavaScript loaded initially.
+- Loads components when they are needed.
+- Can improve the initial loading performance of large applications.
+- Works well for pages that users may not visit immediately.
+
+**Note:** The fallback appears when the lazy-loaded component's code has not finished loading. If the code is already available, the fallback may not be visible.
+
+---
+
+## 3. Suspense Fallback UI
+
+The `fallback` prop defines the UI displayed while a child component is waiting.
+
+You can display text, a spinner, or a custom loading component.
+
+### Example: Loading Message
+
+```jsx
+import { Suspense, lazy } from "react";
+
+const Profile = lazy(() => import("./Profile"));
+
+function App() {
+  return (
+    <Suspense fallback={<h3>Loading profile...</h3>}>
+      <Profile />
+    </Suspense>
+  );
+}
+
+export default App;
+```
+
+### Example: Reusable Loading Component
+
+```jsx
+import { Suspense, lazy } from "react";
+
+const Profile = lazy(() => import("./Profile"));
+
+function Loader() {
+  return <div>Please wait, loading...</div>;
+}
+
+function App() {
+  return (
+    <Suspense fallback={<Loader />}>
+      <Profile />
+    </Suspense>
+  );
+}
+
+export default App;
+```
+
+Using a separate loading component makes the code easier to maintain and reuse.
+
+---
+
+## 4. Multiple Suspense Boundaries
+
+You can use multiple Suspense boundaries to handle loading states for different parts of an application independently.
+
+### Example
+
+```jsx
+import { Suspense, lazy } from "react";
+
+const Header = lazy(() => import("./Header"));
+const Dashboard = lazy(() => import("./Dashboard"));
+const Footer = lazy(() => import("./Footer"));
+
+function App() {
+  return (
+    <div>
+      <Suspense fallback={<p>Loading header...</p>}>
+        <Header />
+      </Suspense>
+
+      <Suspense fallback={<p>Loading dashboard...</p>}>
+        <Dashboard />
+      </Suspense>
+
+      <Suspense fallback={<p>Loading footer...</p>}>
+        <Footer />
+      </Suspense>
+    </div>
+  );
+}
+
+export default App;
+```
+
+### Explanation
+
+- Each boundary manages its own fallback.
+- Different sections can finish loading at different times.
+- A slow-loading section does not necessarily require the entire page to show one loading message.
+
+**Best practice:** Choose Suspense boundaries based on meaningful sections of your UI, rather than adding a boundary around every small component.
+
+---
+
+## 5. Suspense for Data Fetching
+
+Suspense can also be used while data is loading, but the data source must support Suspense.
+
+React does **not** automatically activate Suspense when you fetch data using ordinary `fetch()` calls inside `useEffect()`.
+
+### Example: Traditional Data Fetching
+
+```jsx
+import { useEffect, useState } from "react";
+
+function Users() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        const response = await fetch(
+          "https://jsonplaceholder.typicode.com/users",
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch users");
+        }
+
+        const data = await response.json();
+        setUsers(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchUsers();
+  }, []);
+
+  if (loading) {
+    return <p>Loading users...</p>;
+  }
+
+  return (
+    <ul>
+      {users.map((user) => (
+        <li key={user.id}>{user.name}</li>
+      ))}
+    </ul>
+  );
+}
+
+export default Users;
+```
+
+In this example, the component manages its own loading state. **Suspense does not handle this loading state automatically.**
+
+Suspense-based data loading is available through supported frameworks and libraries. Follow the relevant library's documentation for its specific API.
+
+---
+
+## 6. Suspense and Error Boundaries
+
+Suspense and Error Boundaries serve different purposes.
+
+- **Suspense:** Displays a fallback while a supported operation is waiting.
+- **Error Boundary:** Displays fallback UI when a descendant component throws an error during rendering.
+
+### Example
+
+```jsx
+import { Component, Suspense, lazy } from "react";
+
+const Dashboard = lazy(() => import("./Dashboard"));
+
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <p>Something went wrong.</p>;
+    }
+
+    return this.props.children;
+  }
+}
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<p>Loading dashboard...</p>}>
+        <Dashboard />
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
+
+export default App;
+```
+
+### Explanation
+
+- Suspense displays `Loading dashboard...` while the lazy-loaded component is loading.
+- The Error Boundary can display `Something went wrong.` if an error is thrown during rendering or lazy component loading.
+- Suspense itself is not an error-handling mechanism.
+
+---
+
+## 7. Suspense in Server Rendering
+
+Suspense also works with React's server-rendering capabilities.
+
+It can help React stream parts of a page as they become ready instead of waiting for every part to finish before sending any HTML.
+
+### Example
+
+```jsx
+import { Suspense } from "react";
+
+function Comments() {
+  return <p>Comments section</p>;
+}
+
+function App() {
+  return (
+    <main>
+      <h1>Blog Post</h1>
+
+      <Suspense fallback={<p>Loading comments...</p>}>
+        <Comments />
+      </Suspense>
+    </main>
+  );
+}
+
+export default App;
+```
+
+This example demonstrates a Suspense boundary. The `Comments` component above is synchronous, so it does not actually trigger the fallback.
+
+In a real server-rendered application, a Suspense boundary can be used with supported asynchronous rendering patterns and React server-rendering APIs.
+
+---
+
+## 8. Suspense vs. useEffect
+
+| Feature                | Suspense                                               | useEffect                                        |
+| ---------------------- | ------------------------------------------------------ | ------------------------------------------------ |
+| Main purpose           | Coordinates loading fallbacks for supported operations | Runs side effects after rendering                |
+| Loading UI             | Can display a fallback through a Suspense boundary     | Usually managed using component state            |
+| Lazy component loading | Works with `React.lazy()`                              | Not required for this                            |
+| Data fetching          | Requires Suspense-compatible support                   | Can run ordinary API requests                    |
+| Error handling         | Does not replace error handling                        | Errors need appropriate handling                 |
+| Common use             | Lazy loading and supported Suspense-based data loading | API calls, subscriptions, and other side effects |
+
+**Key point:** Suspense and `useEffect()` solve different problems. You can use either approach depending on the requirements of your application.
+
+---
+
+## 9. Best Practices
+
+- **Always provide a useful fallback** for lazy-loaded components.
+- Use meaningful loading messages or skeleton screens.
+- Place boundaries around logical UI sections.
+- Use Error Boundaries when you need to handle rendering errors.
+- Do not assume that every API request automatically activates Suspense.
+- Use a framework or library that explicitly supports Suspense-based data fetching when required.
+- Avoid unnecessarily splitting every small component into a separate lazy-loaded module.
+
+---
+
+## 10. Key Points to Remember
+
+- **Suspense** allows React to display fallback UI while supported operations are waiting.
+- `React.lazy()` is a common way to use Suspense for code splitting.
+- The `fallback` prop defines what users see while waiting.
+- Multiple Suspense boundaries can manage different sections independently.
+- Suspense does not automatically handle ordinary API calls made inside `useEffect()`.
+- Suspense and Error Boundaries have different responsibilities.
+- Suspense can be used with React server rendering and supported asynchronous rendering patterns.
+
+---
+
+## Interview Question
+
+**Q: What is Suspense in React?**
+
+**Answer:** Suspense is a React feature that allows a component to display a fallback UI while waiting for a supported operation, such as loading a component with `React.lazy()`. It can also support data loading through compatible frameworks and libraries.
+
+**Q: Does Suspense automatically handle all API calls?**
+
+**Answer:** No. Ordinary API calls inside `useEffect()` do not automatically trigger Suspense. The data-fetching mechanism must support Suspense.
+
+**Q: What is the difference between Suspense and an Error Boundary?**
+
+**Answer:** Suspense handles waiting states by displaying fallback UI, while an Error Boundary handles certain rendering errors by displaying error fallback UI.
