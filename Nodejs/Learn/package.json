@@ -1,0 +1,22 @@
+{
+  "name": "nodejs",
+  "version": "1.0.0",
+  "main": "node_basic.js",
+  "scripts": {
+    "eventdev": "nodemon eventLoop.js",
+    "basic": "nodemon basic_node.js",
+    "start": "nodemon node_basic.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "dotenv": "^18.0.9",
+    "events": "^3.3.0",
+    "fs": "^0.0.1-security",
+    "nodemon": "^3.1.14"
+  }
+}
